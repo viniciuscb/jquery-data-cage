@@ -17,6 +17,8 @@
 
 Elements outside form:<br/>
 <a href="#" onclick="alert('link clicked'); return false;">Example link</a><br/>
+<a href="http://www.google.com">Outside link</a><br/>
+
 <button onclick="alert('button clicked'); return false;">Example button</button><br/>
 Example input: <input name="elm1" type="text" value="input" onclick="alert('input clicked'); return false;"/><br/>
 Example select: <select name="elm2" onclick="alert('select clicked'); return false;"><option name="option1">Option 1</option><option name="option2">Option2</option></select><br/>
@@ -58,7 +60,7 @@ Textarea:
 
 <script type="text/javascript">
     jQuery(document).ready(function(){
-        cbs_form_manager.register_context_form('#form1')
+        cbs_form_manager.register('#form1')
     });
 </script>
 

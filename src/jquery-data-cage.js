@@ -24,13 +24,12 @@ var cbs_form_manager = null;
                     autoOpen: false,
                     modal: true,
                     resizable: false,
-                    draggable: false//,
-                    //height: 140
+                    draggable: false
             });
 
 
         var context_manager = this;
-        jQuery('a,input,button,select,textarea').live('mousedown',function(e) {
+        jQuery('a,input,button,select,textarea').on('mousedown',function(e) {
             if (context_manager.exit_dialog.dialog('isOpen') || cbs_error_message.isShown()) { return true; }
 
             //verifica o contexto atual
@@ -48,7 +47,7 @@ var cbs_form_manager = null;
 
                         context_manager.exit_dialog.dialog({
                             buttons: {
-                                "Yes": function() {
+                                "yes": function() {
                                     if (old_form.data('remote')) {
                                         old_form.trigger('submit.rails');
                                     } else {
@@ -57,10 +56,13 @@ var cbs_form_manager = null;
                                     old_form.data('link-click',e.target);
                                     jQuery( this ).dialog( "close" );
                                 },
-                                "No": function() {
+                                "no": function() {
                                     jQuery( this ).dialog( "close" );
                                     context_manager._change_context(new_context);
-                                    jQuery(e.target).trigger('click')
+
+                                    var me = document.createEvent('MouseEvents');
+                                    me.initEvent( 'click', true, true );
+                                    e.target.dispatchEvent(me);
                                 }
                             }});
 
@@ -73,36 +75,59 @@ var cbs_form_manager = null;
             }
 
             return true;
-        }).live('keydown',function() {
+        }).on('keydown change',function() {
             jQuery(this).closest('[data-cage-changed]').attr('data-cage-changed','true')
         })
-
         
-        
-    }
+    };
 
     jQueryDataCage.prototype.initialize = function() {
         _(this).bindAll('success')
     };
 
-    //options: hash de callbacks a serem executados nos eventos :enterContext e
-    // :exitContext, passar caso seja necessário, esses callbacks irão executar
+    //options:
+    //  - commit   : callback to execute when the 'commit' button is clicked
+    //  - rollback : callback to execute when the 'rollback' button is clicked
+    //  - close    : callback to execute when the 'close' button is clicked
+
+    //  - dialog_message: message to be shown when the dialog appears
+    //  - dialog_commit_button_name: name of the commit button (default: yes)
+    //  - dialog_rollback_button_name: name of the rollback button (default: no)
+
+    //  - enterContext : [optional] callback to execute when entering this context
+    //  - exitContext  : [optional] callback to execute when exiting this context
+    // :exitContext,passar caso seja necessário, esses callbacks irão executar
+
     // depois da resposta da confirmação se houve mudança de contexto
-    jQueryDataCage.prototype.register_context_form = function(form_selector, options) {
+    jQueryDataCage.prototype.register = function(form_selector, options) {
 
         if (options == null) { options = { }}
+        var data_cage_callbacks = {};
+        if (options.commit   != null) { data_cage_callbacks['data_cage.commit']   = options.commit; }
+        if (options.rollback != null) { data_cage_callbacks['data_cage.rollback'] = options.rollback; }
+        if (options.close    != null) { data_cage_callbacks['data_cage.close'] = options.close; }
 
-        //utiliza a string mesma do selector para o nome do contexto. Caso seja necessário
-        //colocaremos outra string. Este código não prevê que um formulário esteja em mais
-        //de um contexto(por exemplo que um contexto se extenda para mais de um form)
-        //aqui prevejo que haverá apenas um contexto por form.
-        jQuery(form_selector).attr('data-cage-changed','false').bind(options);
+        if (options.enterContext != null) { data_cage_callbacks['data_cage.enterContext'] = options.enterContext; }
+        if (options.exitContext  != null) { data_cage_callbacks['data_cage.exitContext'] = options.exitContext; }
+
+        var data_cage_options = {};
+        if (options.dialog_message  != null) { data_cage_options['data_cage.dialog_message'] = options.dialog_message; }
+        if (options.dialog_commit_button_name  != null) { data_cage_options['data_cage.dialog_commit_button_name'] = options.dialog_commit_button_name; }
+        if (options.dialog_rollback_button_name  != null) { data_cage_options['data_cage.dialog_rollback_button_name'] = options.dialog_rollback_button_name; }
+        
+        var form = jQuery(form_selector);
+
+        form.attr('data-cage-changed','false').on(data_cage_callbacks);
+
+        _(data_cage_options).each(function(option,key) {
+            form.data(key,option);
+        });
     };
 
-    jQueryDataCage.prototype.unregister_context_form = function(form_selector) {
+    jQueryDataCage.prototype.unregister = function(form_selector) {
         var form = jQuery(form_selector)
-            .unbind('enterContext')
-            .unbind('exitContext')
+            .unbind('data_cage.enterContext')
+            .unbind('data_cage.exitContext')
             .attr('data-cage-changed',null);
     };
 
@@ -158,7 +183,7 @@ var cbs_form_manager = null;
                 this.previous_data_changed = jQuery(this.current_context).attr('data-cage-changed');
                 jQuery(this.current_context)
                     .attr('data-cage-changed','false')
-                    .trigger('exitContext')
+                    .trigger('data_cage.exitContext')
             }
 
             //stores previous context due to make 'undo context change' operation possible
@@ -167,7 +192,7 @@ var cbs_form_manager = null;
 
             //entrando em um contexto novo
             if (new_context != '') {
-                jQuery(new_context).trigger('enterContext')
+                jQuery(new_context).trigger('data_cage.enterContext')
             }
         }
     };
