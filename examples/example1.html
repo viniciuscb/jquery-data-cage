@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Basic jQuery-data-cage use</title>
+
+    <link rel="stylesheet" href="../lib/css/redmond/jquery-ui-1.9.0.custom.min.css">
+
+    <script type="text/javascript" src="../lib/jquery-1.8.2.min.js"></script>
+    <script type="text/javascript" src="../lib/jquery-ui-1.9.0.custom.min.js"></script>
+    <script type="text/javascript" src="../lib/underscore-min.js"></script>
+    <script type="text/javascript" src="../src/errors.js"></script>
+    <script type="text/javascript" src="../src/jquery-data-cage.js"></script>
+    <script type="text/javascript" src="example1.js"></script>
+
+</head>
+<body>
+
+Elements outside form:<br/>
+<a href="#" onclick="alert('link clicked'); return false;">Example link</a><br/>
+<button onclick="alert('button clicked'); return false;">Example button</button><br/>
+Example input: <input name="elm1" type="text" value="input" onclick="alert('input clicked'); return false;"/><br/>
+Example select: <select name="elm2" onclick="alert('select clicked'); return false;"><option name="option1">Option 1</option><option name="option2">Option2</option></select><br/>
+Example textarea: <textarea name="elm3" onclick="alert('textarea clicked'); return false;"></textarea>
+
+
+<br/>
+<br/>
+
+Caged Form:
+<form id="form1" style="border: 1px solid black;">
+
+Input text:
+    <input type="text" name="input1"/><br/>
+
+Checkboxes:
+    <input type="checkbox" name="input2" value="1"/>
+    <input type="checkbox" name="input3" value="2"/>
+    <br/>
+
+Radios:
+    <input type="radio" name="input4" value="1"/>
+    <input type="radio" name="input4" value="2"/>
+    <br/>
+
+Select:
+    <select name>
+        <option value="1">option 1</option>
+        <option value="1">option 2</option>
+    </select>
+    <br/>
+
+Textarea:
+    <textarea></textarea><br/>
+
+
+
+</form>
+
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        cbs_form_manager.register_context_form('#form1')
+    });
+</script>
+
+
+
+</body>
+</html>
